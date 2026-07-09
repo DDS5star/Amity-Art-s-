@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Amity Art's — Jewellery E-commerce
 
-## Getting Started
+Enterprise-grade luxury jewelry e-commerce platform with **retail (B2C)** and **wholesale (B2B)** channels. India-first: INR, GST invoicing, Razorpay, WhatsApp order notifications.
 
-First, run the development server:
+## Stack
+
+Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma + PostgreSQL 16 · Redis 7 · Zod · JWT (access + rotating refresh) · Vitest
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full system design and [docs/ERD.md](docs/ERD.md) for the data model.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Infrastructure (Postgres on :5433, Redis on :6380)
+docker compose up -d
+
+# 2. Environment
+cp .env.example .env   # defaults work for local dev
+
+# 3. Install, migrate, seed
+npm install
+npm run db:migrate
+npm run db:seed
+
+# 4. Run
+npm run dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run build` / `start` | Production build / serve |
+| `npm run lint` / `typecheck` | ESLint / `tsc --noEmit` |
+| `npm run test` | Vitest suite |
+| `npm run db:migrate` | Create/apply dev migrations |
+| `npm run db:seed` | Seed attributes, zones, settings, demo catalog + users |
+| `npm run db:studio` | Prisma Studio |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Seeded logins (dev only)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Role | Email | Password |
+|---|---|---|
+| Super Admin | `admin@amityarts.in` | `Admin@12345` |
+| Manager | `manager@amityarts.in` | `Manager@12345` |
+| Wholesaler (approved) | `wholesaler@amityarts.in` | `Wholesale@12345` |
+| Customer | `customer@amityarts.in` | `Customer@12345` |
