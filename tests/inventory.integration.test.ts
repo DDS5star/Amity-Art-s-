@@ -13,8 +13,13 @@ let categoryId: string;
 beforeAll(async () => {
   const category = await prisma.category.upsert({
     where: { slug: "test-inventory-cat" },
-    update: {},
-    create: { name: "Test Inventory", slug: "test-inventory-cat", path: "/test-inventory-cat/" },
+    update: { isActive: false },
+    create: {
+      name: "Test Inventory",
+      slug: "test-inventory-cat",
+      path: "/test-inventory-cat/",
+      isActive: false, // must never appear in the public tree
+    },
   });
   categoryId = category.id;
   // Fresh product each run (delete leftovers first for idempotency).
