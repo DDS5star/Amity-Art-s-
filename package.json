@@ -16,14 +16,21 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^6.19.3",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "bcryptjs": "^3.0.3",
+    "gsap": "^3.15.0",
     "ioredis": "^5.11.1",
     "jose": "^6.2.3",
+    "motion": "^12.42.2",
     "next": "15.5.20",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "zod": "^4.4.3"
+    "three": "^0.185.1",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -32,6 +39,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.185.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.20",
     "prisma": "^6.19.3",

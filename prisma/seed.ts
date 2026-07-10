@@ -364,6 +364,134 @@ async function seedCatalog() {
   console.log("✓ 6 categories, 3 products (1 with size-matrix variants + tiers)");
 }
 
+/** Placeholder photography wired through ProductMedia — replace URLs with real shots later. */
+async function seedMediaAndMoreProducts() {
+  const cat = async (slug: string) =>
+    (await prisma.category.findUniqueOrThrow({ where: { slug } })).id;
+
+  const more: {
+    name: string; slug: string; sku: string; category: string;
+    price: number; wholesale: number; compareAt?: number; occasion: string[];
+    short: string; material: string; weight: number;
+    flags?: Partial<Record<"isFeatured" | "isTrending" | "isNewArrival" | "isBestSeller", boolean>>;
+  }[] = [
+    {
+      name: "Polki Chandbali Earrings", slug: "polki-chandbali-earrings", sku: "AA-ERG-0002",
+      category: "earrings", price: 1899, wholesale: 1120, compareAt: 2399,
+      occasion: ["wedding", "festive"], short: "Crescent chandbalis with uncut polki and pearl drops.",
+      material: "Brass, 22k gold plated, polki", weight: 32,
+      flags: { isFeatured: true, isBestSeller: true },
+    },
+    {
+      name: "Emerald Cut CZ Cocktail Ring", slug: "emerald-cut-cz-cocktail-ring", sku: "AA-RNG-0001",
+      category: "rings", price: 1149, wholesale: 690,
+      occasion: ["party", "office"], short: "A single emerald-cut CZ on a tapered band.",
+      material: "925 silver, cubic zirconia", weight: 8.4,
+      flags: { isNewArrival: true, isTrending: true },
+    },
+    {
+      name: "Temple Coin Necklace", slug: "temple-coin-necklace", sku: "AA-NCK-0002",
+      category: "necklaces", price: 2199, wholesale: 1340, compareAt: 2799,
+      occasion: ["festive", "temple"], short: "Lakshmi coin strand in an antique temple finish.",
+      material: "Brass, antique gold plated", weight: 58,
+      flags: { isFeatured: true, isBestSeller: true },
+    },
+    {
+      name: "Rose Quartz Stud Earrings", slug: "rose-quartz-stud-earrings", sku: "AA-ERG-0003",
+      category: "earrings", price: 749, wholesale: 440,
+      occasion: ["daily", "office"], short: "Bezel-set rose quartz studs for every day.",
+      material: "925 silver, rose quartz", weight: 4.2,
+      flags: { isNewArrival: true },
+    },
+    {
+      name: "Bridal Kundan Choker Set", slug: "bridal-kundan-choker-set", sku: "AA-NCK-0003",
+      category: "bridal-collection", price: 6499, wholesale: 3900, compareAt: 7999,
+      occasion: ["wedding"], short: "Full kundan choker with matching earrings and maang tikka.",
+      material: "Brass, 22k gold plated, kundan, pearls", weight: 145,
+      flags: { isFeatured: true, isTrending: true },
+    },
+  ];
+
+  for (const p of more) {
+    await prisma.product.upsert({
+      where: { slug: p.slug },
+      update: {},
+      create: {
+        name: p.name, slug: p.slug, sku: p.sku, categoryId: await cat(p.category),
+        gender: "WOMEN", occasion: p.occasion, shortDescription: p.short,
+        description: `${p.short} Handcrafted in Mumbai with hypoallergenic, nickel-free plating.`,
+        material: p.material, hsnCode: "7117", weightGrams: p.weight,
+        retailPrice: p.price, wholesalePrice: p.wholesale, compareAtPrice: p.compareAt,
+        taxRatePercent: 3, stockQty: 80, searchKeywords: p.slug.split("-"),
+        ...p.flags,
+      },
+    });
+  }
+
+  // Attach placeholder media to every product that has none.
+  const products = await prisma.product.findMany({ where: { media: { none: {} } } });
+  for (const product of products) {
+    await prisma.productMedia.createMany({
+      data: [0, 1, 2].map((i) => ({
+        productId: product.id,
+        type: "IMAGE" as const,
+        url: `https://picsum.photos/seed/${product.slug}-${i}/1200/1500`,
+        thumbnailUrl: `https://picsum.photos/seed/${product.slug}-${i}/480/600`,
+        altText: product.name,
+        sortOrder: i,
+        isPrimary: i === 0,
+      })),
+    });
+  }
+
+  // A curated collection for the homepage rail.
+  const collection = await prisma.collection.upsert({
+    where: { slug: "the-wedding-edit" },
+    update: {},
+    create: {
+      name: "The Wedding Edit", slug: "the-wedding-edit",
+      description: "Kundan, polki and pearl pieces for the big day.",
+      imageUrl: "https://picsum.photos/seed/wedding-edit/1600/900",
+    },
+  });
+  const bridalProducts = await prisma.product.findMany({
+    where: { occasion: { has: "wedding" }, deletedAt: null },
+    take: 4,
+  });
+  for (const [i, bp] of bridalProducts.entries()) {
+    await prisma.productCollection.upsert({
+      where: { productId_collectionId: { productId: bp.id, collectionId: collection.id } },
+      update: {},
+      create: { productId: bp.id, collectionId: collection.id, sortOrder: i },
+    });
+  }
+
+  const testimonialCount = await prisma.testimonial.count();
+  if (testimonialCount === 0) {
+    await prisma.testimonial.createMany({
+      data: [
+        {
+          name: "Meenakshi Iyer", rating: 5, sortOrder: 0,
+          content: "The kundan set survived three weddings and still looks like the day it arrived.",
+          imageUrl: "https://picsum.photos/seed/meenakshi-portrait/200/200",
+        },
+        {
+          name: "Ritika Malhotra", rating: 5, sortOrder: 1,
+          content: "Ordered on a Tuesday, wore it to the sangeet on Friday. The plating is remarkable for the price.",
+          imageUrl: "https://picsum.photos/seed/ritika-portrait/200/200",
+        },
+        {
+          name: "Farah Ansari", rating: 4, sortOrder: 2,
+          content: "My mother thought the polki chandbalis were heirloom pieces. I let her believe it.",
+          imageUrl: "https://picsum.photos/seed/farah-portrait/200/200",
+        },
+      ],
+    });
+  }
+
+  console.log(`✓ ${more.length} retail products, media for all, wedding collection, testimonials`);
+}
+
 async function seedCms() {
   const existing = await prisma.announcementBar.findFirst();
   if (!existing) {
@@ -389,6 +517,7 @@ async function main() {
   await seedShippingZones();
   await seedUsers();
   await seedCatalog();
+  await seedMediaAndMoreProducts();
   await seedCms();
 }
 

@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
+/*
+  Amity Art's design tokens — "Forest" luxury family, dark-locked by brand
+  direction. Deep green near-black surfaces, bone text, single amber accent.
+*/
+@theme {
+  --color-forest-950: #0b0f0d;
+  --color-forest-900: #101613;
+  --color-forest-850: #151d19;
+  --color-forest-800: #1b2620;
+  --color-forest-700: #27362e;
+  --color-forest-600: #3a4f43;
+
+  --color-bone-50: #f3f1ea;
+  --color-bone-100: #e9e6db;
+  --color-bone-300: #cfcabb;
+  --color-bone-500: #a3a396;
+  --color-bone-600: #82836f;
+
+  --color-amber-accent: #cfa14c;
+  --color-amber-soft: #e3c284;
+
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-forest-950);
+  color: var(--color-bone-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--color-amber-accent);
+  color: var(--color-forest-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber-accent);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-forest-700) transparent;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
