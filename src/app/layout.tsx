@@ -4,11 +4,13 @@ import "./globals.css";
 import { AnnouncementBar } from "@/components/site/AnnouncementBar";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { Logo } from "@/components/site/Logo";
+import { WhatsAppButton } from "@/components/site/WhatsAppButton";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",
   display: "swap",
@@ -23,11 +25,11 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "Amity Art's — Fine Handcrafted Jewellery",
-    template: "%s | Amity Art's",
+    default: "Amity Arts — Fine Handcrafted Jewellery, India",
+    template: "%s | Amity Arts",
   },
   description:
-    "Kundan, polki and pearl jewellery handcrafted in Mumbai. Retail and wholesale.",
+    "Kundan, polki and pearl jewellery handcrafted in India by Amity Arts®. Retail and wholesale.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,10 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-[100dvh] flex flex-col">
         <AnnouncementBar />
-        <Navbar />
+        <Navbar logo={<Logo />} />
         <main className="flex-1">{children}</main>
         <Footer />
         <CartDrawer />
+        <WhatsAppButton />
       </body>
     </html>
   );

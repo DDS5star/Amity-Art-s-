@@ -20,7 +20,7 @@ export function Gallery({ media, name }: { media: Media[]; name: string }) {
 
   if (images.length === 0) {
     return (
-      <div className="aspect-[4/5] rounded-xl bg-forest-850 flex items-center justify-center text-bone-600">
+      <div className="aspect-[4/5] rounded-xl bg-ivory-100 flex items-center justify-center text-ink-400">
         Photography coming soon
       </div>
     );
@@ -28,7 +28,7 @@ export function Gallery({ media, name }: { media: Media[]; name: string }) {
 
   return (
     <div>
-      <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-forest-850">
+      <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-ivory-100">
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
@@ -58,7 +58,7 @@ export function Gallery({ media, name }: { media: Media[]; name: string }) {
               onClick={() => setIndex(i)}
               aria-label={`View image ${i + 1}`}
               className={`relative w-20 aspect-[4/5] rounded-lg overflow-hidden transition-opacity ${
-                i === index ? "ring-2 ring-amber-accent" : "opacity-60 hover:opacity-100"
+                i === index ? "ring-2 ring-gold-600" : "opacity-60 hover:opacity-100"
               }`}
             >
               <Image

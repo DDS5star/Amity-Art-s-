@@ -1,5 +1,6 @@
 import { Hero } from "@/components/home/Hero";
 import {
+  TrustStrip,
   CategoryRail,
   BestSellers,
   BrandStory,
@@ -14,6 +15,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <TrustStrip />
       <CategoryRail />
       <BestSellers />
       <BrandStory />

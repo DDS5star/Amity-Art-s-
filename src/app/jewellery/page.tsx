@@ -44,7 +44,7 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
       <Reveal>
-        <h1 className="font-display text-4xl md:text-5xl text-bone-50">Jewellery</h1>
+        <h1 className="font-display text-4xl md:text-5xl text-ink-950">Jewellery</h1>
       </Reveal>
 
       {/* Category pills + sort */}
@@ -53,8 +53,8 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
           href="/jewellery"
           className={`px-4 py-2 rounded-full text-sm transition-colors ${
             !query.categorySlug
-              ? "bg-bone-100 text-forest-950 font-semibold"
-              : "border border-forest-700 text-bone-300 hover:border-bone-500"
+              ? "bg-ink-950 text-white font-semibold"
+              : "border border-ivory-300 text-ink-700 hover:border-ink-500"
           }`}
         >
           All
@@ -65,8 +65,8 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
             href={qs({ categorySlug: c.slug, sort: query.sort })}
             className={`px-4 py-2 rounded-full text-sm transition-colors ${
               active(c.slug)
-                ? "bg-bone-100 text-forest-950 font-semibold"
-                : "border border-forest-700 text-bone-300 hover:border-bone-500"
+                ? "bg-ink-950 text-white font-semibold"
+                : "border border-ivory-300 text-ink-700 hover:border-ink-500"
             }`}
           >
             {c.name}
@@ -74,15 +74,15 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
         ))}
 
         <div className="ml-auto flex items-center gap-2 text-sm">
-          <span className="text-bone-600">Sort</span>
+          <span className="text-ink-400">Sort</span>
           {SORTS.map((s) => (
             <Link
               key={s.value}
               href={qs({ categorySlug: query.categorySlug, sort: s.value })}
               className={
                 query.sort === s.value
-                  ? "text-amber-soft underline underline-offset-4"
-                  : "text-bone-500 hover:text-bone-100 transition-colors"
+                  ? "text-gold-700 underline underline-offset-4"
+                  : "text-ink-500 hover:text-ink-950 transition-colors"
               }
             >
               {s.label}
@@ -93,10 +93,10 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
 
       {items.length === 0 ? (
         <div className="py-32 text-center">
-          <p className="font-display text-2xl text-bone-300">Nothing here yet.</p>
-          <p className="mt-2 text-sm text-bone-600">
+          <p className="font-display text-2xl text-ink-700">Nothing here yet.</p>
+          <p className="mt-2 text-sm text-ink-400">
             Try a different category, or{" "}
-            <Link href="/jewellery" className="text-amber-soft underline underline-offset-4">
+            <Link href="/jewellery" className="text-gold-700 underline underline-offset-4">
               view everything
             </Link>
             .
@@ -125,8 +125,8 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
               aria-current={n === pagination.page ? "page" : undefined}
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm ${
                 n === pagination.page
-                  ? "bg-bone-100 text-forest-950 font-semibold"
-                  : "border border-forest-700 text-bone-300 hover:border-bone-500"
+                  ? "bg-ink-950 text-white font-semibold"
+                  : "border border-ivory-300 text-ink-700 hover:border-ink-500"
               }`}
             >
               {n}

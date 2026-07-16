@@ -64,12 +64,12 @@ export function DeliveryEstimator({ productId, variantId }: { productId: string;
             setState("idle");
           }}
           placeholder="Delivery pincode"
-          className="flex-1 px-4 py-2.5 rounded-full bg-forest-900 border border-forest-700 text-bone-100 placeholder:text-bone-600 text-sm focus:border-amber-accent"
+          className="flex-1 px-4 py-2.5 rounded-full bg-white border border-ivory-300 text-ink-950 placeholder:text-ink-400 text-sm focus:border-gold-600"
         />
         <button
           type="submit"
           disabled={state === "loading"}
-          className="px-5 py-2.5 rounded-full border border-forest-600 text-bone-100 text-sm hover:border-bone-500 transition-colors disabled:opacity-60"
+          className="px-5 py-2.5 rounded-full border border-ink-400 text-ink-950 text-sm hover:border-ink-500 transition-colors disabled:opacity-60"
         >
           {state === "loading" ? "Checking…" : "Check"}
         </button>
@@ -79,16 +79,16 @@ export function DeliveryEstimator({ productId, variantId }: { productId: string;
 
       {estimate && (
         <div className="mt-3 flex items-start gap-3 text-sm">
-          <Truck size={18} className="text-amber-soft mt-0.5 shrink-0" />
-          <div className="text-bone-300">
+          <Truck size={18} className="text-gold-700 mt-0.5 shrink-0" />
+          <div className="text-ink-700">
             <p>
               Delivery by{" "}
-              <span className="text-bone-50 font-medium">
+              <span className="text-ink-950 font-medium">
                 {fmtDate(estimate.earliest)} to {fmtDate(estimate.latest)}
               </span>{" "}
               ({estimate.zoneName})
             </p>
-            <p className="text-xs text-bone-600 mt-1">
+            <p className="text-xs text-ink-400 mt-1">
               {estimate.outOfStock && "Made to order. "}
               Shipping ₹{estimate.shippingRate}
               {estimate.freeAbove ? `, free above ₹${estimate.freeAbove}` : ""}

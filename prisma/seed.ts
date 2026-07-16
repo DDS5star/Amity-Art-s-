@@ -23,8 +23,9 @@ async function seedSettings() {
     { key: "gst.defaultRatePercent", value: 3, group: "tax" }, // imitation jewellery HSN 7117
     { key: "gst.sellerGstin", value: "", group: "tax" },
     { key: "gst.defaultHsnCode", value: "7117", group: "tax" },
-    { key: "store.name", value: "Amity Art's", group: "general" },
+    { key: "store.name", value: "Amity Arts", group: "general" },
     { key: "store.currency", value: "INR", group: "general" },
+    { key: "store.whatsappNumber", value: "919999999999", group: "general" }, // replace with the business number
     { key: "integrations.whatsapp.enabled", value: false, group: "integrations" },
     { key: "integrations.razorpay.enabled", value: false, group: "integrations" },
     { key: "integrations.stripe.enabled", value: false, group: "integrations" },

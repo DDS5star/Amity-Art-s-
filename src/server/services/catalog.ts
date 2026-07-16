@@ -255,7 +255,8 @@ export async function listProducts(query: ListProductsQuery, channel: Channel) {
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        media: { where: { isPrimary: true }, take: 1 },
+        // First two images: primary + hover-swap for product cards.
+        media: { where: { type: "IMAGE" }, orderBy: { sortOrder: "asc" }, take: 2 },
         category: { select: { name: true, slug: true, path: true } },
       },
     }),
@@ -390,5 +391,6 @@ function serializeListProduct(
     },
     rating: { avg: Number(p.avgRating), count: p.reviewCount },
     primaryImage: p.media?.[0] ?? null,
+    hoverImage: p.media?.[1] ?? null,
   };
 }

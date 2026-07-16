@@ -1,32 +1,33 @@
 @import "tailwindcss";
 
 /*
-  Amity Art's design tokens — "Forest" luxury family, dark-locked by brand
-  direction. Deep green near-black surfaces, bone text, single amber accent.
+  Amity Arts® design tokens — light luxury family derived from the brand logo
+  (black wordmark + gold accent on white). Ivory surfaces, ink text, gold CTA.
 */
 @theme {
-  --color-forest-950: #0b0f0d;
-  --color-forest-900: #101613;
-  --color-forest-850: #151d19;
-  --color-forest-800: #1b2620;
-  --color-forest-700: #27362e;
-  --color-forest-600: #3a4f43;
+  --color-ivory-50: #fbfaf8;
+  --color-ivory-100: #f4f1e9;
+  --color-ivory-200: #ece7db;
+  --color-ivory-300: #ddd6c4;
 
-  --color-bone-50: #f3f1ea;
-  --color-bone-100: #e9e6db;
-  --color-bone-300: #cfcabb;
-  --color-bone-500: #a3a396;
-  --color-bone-600: #82836f;
+  --color-ink-950: #191612;
+  --color-ink-800: #2c2823;
+  --color-ink-700: #44403a;
+  --color-ink-500: #78716c;
+  --color-ink-400: #a8a29e;
 
-  --color-amber-accent: #cfa14c;
-  --color-amber-soft: #e3c284;
+  --color-gold-500: #c07f0e;
+  --color-gold-600: #a16207;
+  --color-gold-700: #8a5106;
+  --color-gold-800: #6f4105;
+  --color-gold-100: #f6ead2;
 
   --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html {
@@ -40,31 +41,77 @@ html {
 }
 
 body {
-  background-color: var(--color-forest-950);
-  color: var(--color-bone-100);
+  background-color: var(--color-ivory-50);
+  color: var(--color-ink-950);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background-color: var(--color-amber-accent);
-  color: var(--color-forest-950);
+  background-color: var(--color-gold-600);
+  color: #ffffff;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-amber-accent);
+  outline: 2px solid var(--color-gold-600);
   outline-offset: 2px;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-forest-700) transparent;
+  scrollbar-color: var(--color-ivory-300) transparent;
 }
 
 @utility scrollbar-none {
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* Announcement marquee — pauses for reduced motion */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee-x 22s linear infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Gold shimmer sweep on primary CTAs */
+@keyframes shimmer-sweep {
+  from {
+    transform: translateX(-150%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(250%) skewX(-18deg);
+  }
+}
+
+@utility cta-shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+    transform: translateX(-150%) skewX(-18deg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover::after {
+      animation: shimmer-sweep 0.9s ease;
+    }
   }
 }
