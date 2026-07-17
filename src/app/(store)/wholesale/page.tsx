@@ -59,10 +59,10 @@ export default function WholesalePage() {
           </a>
           <p className="text-sm text-ink-400">
             Already approved?{" "}
-            <Link href="/jewellery" className="text-gold-700 underline underline-offset-4">
-              Log in to see your pricing
+            <Link href="/wholesale/order" className="text-gold-700 underline underline-offset-4">
+              Open the order sheet
             </Link>
-            . The full ordering portal is coming shortly.
+            .
           </p>
         </div>
       </Reveal>

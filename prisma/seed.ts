@@ -167,8 +167,8 @@ async function seedUsers() {
   const users = [
     { email: "admin@amityarts.in", password: "Admin@12345", firstName: "Super", lastName: "Admin", role: "SUPER_ADMIN" as const, referralCode: "AMITY-ADMIN" },
     { email: "manager@amityarts.in", password: "Manager@12345", firstName: "Store", lastName: "Manager", role: "MANAGER" as const, referralCode: "AMITY-MGR" },
-    { email: "wholesaler@amityarts.in", password: "Wholesale@12345", firstName: "Bulk", lastName: "Buyer", role: "WHOLESALER" as const, referralCode: "AMITY-WHL" },
-    { email: "customer@amityarts.in", password: "Customer@12345", firstName: "Retail", lastName: "Customer", role: "CUSTOMER" as const, referralCode: "AMITY-CUST" },
+    { email: "wholesaler@amityarts.in", password: "Wholesale@12345", firstName: "Bulk", lastName: "Buyer", role: "WHOLESALER" as const, referralCode: "AMITY-WHL", phone: "9822001100" },
+    { email: "customer@amityarts.in", password: "Customer@12345", firstName: "Retail", lastName: "Customer", role: "CUSTOMER" as const, referralCode: "AMITY-CUST", phone: "9876543210" },
   ];
 
   const created: Record<string, string> = {};
@@ -183,6 +183,7 @@ async function seedUsers() {
         lastName: u.lastName,
         role: u.role,
         referralCode: u.referralCode,
+        phone: (u as { phone?: string }).phone,
         emailVerifiedAt: new Date(),
       },
     });

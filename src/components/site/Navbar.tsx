@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "motion/react";
-import { Handbag, Heart, List, X } from "@phosphor-icons/react";
+import { Handbag, Heart, List, User, X } from "@phosphor-icons/react";
 import { useCart, cartCount } from "@/components/cart/store";
 import { useWishlist } from "@/components/wishlist/store";
 
@@ -53,6 +53,13 @@ export function Navbar({ logo }: { logo: React.ReactNode }) {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <Link
+            href="/account/orders"
+            aria-label="Your account and orders"
+            className="p-2.5 text-ink-800 hover:text-gold-700 transition-colors active:scale-[0.96]"
+          >
+            <User size={21} weight="light" />
+          </Link>
           <Link
             href="/wishlist"
             aria-label={`Wishlist, ${wishlistCount} items`}

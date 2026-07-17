@@ -123,14 +123,13 @@ export function CartDrawer() {
                   <p className="text-xs text-ink-400">
                     GST and shipping calculated at checkout.
                   </p>
-                  <button
-                    type="button"
-                    disabled
-                    title="Checkout ships in the next release"
-                    className="w-full py-3 rounded-full bg-gold-700 text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                  <Link
+                    href="/checkout"
+                    onClick={close}
+                    className="cta-shimmer block w-full py-3 rounded-full bg-gold-700 text-white text-sm font-semibold text-center hover:bg-gold-800 transition-colors active:scale-[0.99]"
                   >
-                    Checkout coming soon
-                  </button>
+                    Checkout
+                  </Link>
                 </div>
               </>
             )}

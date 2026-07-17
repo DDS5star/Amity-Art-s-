@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import {
   SquaresFour,
   Package,
+  Receipt,
   TreeStructure,
   Storefront,
   Users,
@@ -18,6 +19,7 @@ import { useAdminAuth, tryRestoreSession } from "@/components/admin/auth";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: SquaresFour, exact: true },
+  { href: "/admin/orders", label: "Orders", icon: Receipt },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: TreeStructure },
   { href: "/admin/wholesalers", label: "Wholesalers", icon: Storefront },
