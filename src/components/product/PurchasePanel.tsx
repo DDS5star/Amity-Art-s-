@@ -104,7 +104,7 @@ export function PurchasePanel({ product, variants, whatsappNumber }: Props) {
     const el = anchorRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(([entry]) => setShowSticky(!entry.isIntersecting), {
-      rootMargin: "-64px 0px 0px 0px",
+      rootMargin: "-80px 0px 0px 0px",
     });
     observer.observe(el);
     return () => observer.disconnect();

@@ -31,7 +31,7 @@ export function Navbar({ logo }: { logo: React.ReactNode }) {
       initial={reduce ? false : { y: -16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={`sticky top-0 z-40 h-16 bg-ivory-50/95 backdrop-blur-md transition-shadow duration-300 ${
+      className={`sticky top-0 z-40 h-16 md:h-20 bg-ivory-50/95 backdrop-blur-md transition-shadow duration-300 ${
         scrolled ? "shadow-[0_1px_0_0_var(--color-ivory-200),0_8px_24px_-16px_rgb(25_22_18/0.25)]" : ""
       }`}
     >

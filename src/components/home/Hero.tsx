@@ -43,7 +43,7 @@ export function Hero() {
         };
 
   return (
-    <section className="relative min-h-[calc(100dvh-6rem)] max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-12 items-center gap-10 pt-16 lg:pt-0">
+    <section className="relative min-h-[calc(100dvh-7.5rem)] max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-12 items-center gap-10 pt-16 lg:pt-0">
       <div className="lg:col-span-6 xl:col-span-5">
         <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-ink-950">
           <RisingLine words="Fine jewellery," />

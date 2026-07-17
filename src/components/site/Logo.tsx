@@ -16,10 +16,10 @@ export function Logo({ className = "" }: { className?: string }) {
       <Image
         src="/brand/logo.png"
         alt="Amity Arts India"
-        width={200}
-        height={101}
+        width={280}
+        height={141}
         priority
-        className={`h-11 w-auto ${className}`}
+        className={`h-12 md:h-16 w-auto ${className}`}
       />
     );
   }
