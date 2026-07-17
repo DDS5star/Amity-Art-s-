@@ -12,6 +12,7 @@ const KNOWN_SETTINGS: Record<string, z.ZodTypeAny> = {
   "gst.defaultHsnCode": z.string().max(10),
   "store.name": z.string().min(1).max(120),
   "store.currency": z.literal("INR"),
+  "store.whatsappNumber": z.string().regex(/^$|^91[0-9]{10}$/, "Use 91 followed by the 10-digit number"),
   "integrations.whatsapp.enabled": z.boolean(),
   "integrations.razorpay.enabled": z.boolean(),
   "integrations.stripe.enabled": z.boolean(),

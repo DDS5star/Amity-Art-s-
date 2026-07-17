@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
-import { AnnouncementBar } from "@/components/site/AnnouncementBar";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { Logo } from "@/components/site/Logo";
-import { WhatsAppButton } from "@/components/site/WhatsAppButton";
-import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -39,14 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-scroll-behavior="smooth"
       className={`${cormorant.variable} ${manrope.variable}`}
     >
-      <body className="min-h-[100dvh] flex flex-col">
-        <AnnouncementBar />
-        <Navbar logo={<Logo />} />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CartDrawer />
-        <WhatsAppButton />
-      </body>
+      <body className="min-h-[100dvh] flex flex-col">{children}</body>
     </html>
   );
 }
