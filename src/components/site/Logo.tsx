@@ -15,11 +15,11 @@ export function Logo({ className = "" }: { className?: string }) {
     return (
       <Image
         src="/brand/logo.png"
-        alt="Amity Arts"
-        width={150}
-        height={44}
+        alt="Amity Arts India"
+        width={200}
+        height={101}
         priority
-        className={`h-10 w-auto ${className}`}
+        className={`h-11 w-auto ${className}`}
       />
     );
   }

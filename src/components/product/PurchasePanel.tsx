@@ -247,7 +247,7 @@ export function PurchasePanel({ product, variants, whatsappNumber }: Props) {
             </a>
           )}
           <a
-            href="tel:+919999999999"
+            href="tel:+919322239603"
             className="inline-flex items-center gap-1.5 text-ink-800 hover:text-gold-700 transition-colors"
           >
             <Phone size={16} /> Call

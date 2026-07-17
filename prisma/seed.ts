@@ -25,7 +25,7 @@ async function seedSettings() {
     { key: "gst.defaultHsnCode", value: "7117", group: "tax" },
     { key: "store.name", value: "Amity Arts", group: "general" },
     { key: "store.currency", value: "INR", group: "general" },
-    { key: "store.whatsappNumber", value: "919999999999", group: "general" }, // replace with the business number
+    { key: "store.whatsappNumber", value: "919322239603", group: "general" },
     { key: "integrations.whatsapp.enabled", value: false, group: "integrations" },
     { key: "integrations.razorpay.enabled", value: false, group: "integrations" },
     { key: "integrations.stripe.enabled", value: false, group: "integrations" },
