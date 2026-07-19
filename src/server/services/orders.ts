@@ -8,6 +8,7 @@ import { estimateDelivery } from "@/lib/delivery-estimate";
 import { zoneForPincode } from "./shipping";
 import { getWarehouseStateCode, getOutOfStockLeadDays } from "./settings";
 import { notifyOrderPlaced } from "@/server/adapters/whatsapp";
+import { razorpayConfigured, razorpayKeyId, createRazorpayOrder } from "@/server/adapters/razorpay";
 import type { CreateOrderInput } from "@/lib/validation/orders";
 
 /**
@@ -28,6 +29,9 @@ export async function createOrder(userId: string, channel: Channel, input: Creat
     }
   } else if (input.paymentMethod === "PAY_LATER") {
     throw badRequest("Pay later is available to approved wholesalers only");
+  }
+  if (input.paymentMethod === "RAZORPAY" && !razorpayConfigured()) {
+    throw badRequest("Online payment is not configured yet — choose another method");
   }
 
   // Load and validate every product/variant referenced.
@@ -290,6 +294,26 @@ export async function createOrder(userId: string, channel: Channel, input: Creat
     }
   }
 
+  // RAZORPAY: create the gateway order so the client can open checkout.
+  // Failure here never loses the order — it stays payable from the order page.
+  let razorpay: { gatewayOrderId: string; keyId: string; amountPaise: number } | null = null;
+  if (input.paymentMethod === "RAZORPAY") {
+    try {
+      const rp = await createRazorpayOrder({
+        amountInr: Number(order.totalAmount),
+        receipt: order.orderNumber,
+        notes: { orderId: order.id, channel },
+      });
+      await prisma.payment.updateMany({
+        where: { orderId: order.id, method: "RAZORPAY" },
+        data: { gatewayOrderId: rp.id },
+      });
+      razorpay = { gatewayOrderId: rp.id, keyId: razorpayKeyId(), amountPaise: rp.amount };
+    } catch (err) {
+      console.error("[razorpay] order creation failed:", err);
+    }
+  }
+
   // Post-commit side effects (never fail the order):
   if (user.phone) {
     void notifyOrderPlaced({
@@ -313,7 +337,85 @@ export async function createOrder(userId: string, channel: Channel, input: Creat
     })
     .catch(() => {});
 
-  return order;
+  return { ...order, razorpay };
+}
+
+/** Re-arm payment for an existing unpaid RAZORPAY order ("Pay now" on the order page). */
+export async function createPaymentSession(orderId: string, userId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { payments: true } });
+  if (!order || order.userId !== userId) throw notFound("Order");
+  if (order.paymentMethod !== "RAZORPAY" || order.paymentStatus === "PAID") {
+    throw badRequest("This order has no pending online payment");
+  }
+  if (!razorpayConfigured()) throw badRequest("Online payment is not configured yet");
+
+  const existing = order.payments.find((p) => p.method === "RAZORPAY" && p.gatewayOrderId);
+  if (existing?.gatewayOrderId) {
+    return {
+      gatewayOrderId: existing.gatewayOrderId,
+      keyId: razorpayKeyId(),
+      amountPaise: Math.round(Number(order.totalAmount) * 100),
+      orderNumber: order.orderNumber,
+    };
+  }
+  const rp = await createRazorpayOrder({
+    amountInr: Number(order.totalAmount),
+    receipt: order.orderNumber,
+    notes: { orderId: order.id },
+  });
+  await prisma.payment.updateMany({
+    where: { orderId: order.id, method: "RAZORPAY" },
+    data: { gatewayOrderId: rp.id },
+  });
+  return {
+    gatewayOrderId: rp.id,
+    keyId: razorpayKeyId(),
+    amountPaise: rp.amount,
+    orderNumber: order.orderNumber,
+  };
+}
+
+/** Verify the checkout callback and mark the order paid. */
+export async function confirmRazorpayPayment(params: {
+  userId: string;
+  orderId: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  signature: string;
+}) {
+  const { verifyPaymentSignature } = await import("@/server/adapters/razorpay");
+  const order = await prisma.order.findUnique({ where: { id: params.orderId }, include: { payments: true } });
+  if (!order || order.userId !== params.userId) throw notFound("Order");
+
+  const payment = order.payments.find(
+    (p) => p.method === "RAZORPAY" && p.gatewayOrderId === params.razorpayOrderId,
+  );
+  if (!payment) throw badRequest("Unknown payment session");
+  if (order.paymentStatus === "PAID") return order; // idempotent
+
+  const valid = verifyPaymentSignature({
+    razorpayOrderId: params.razorpayOrderId,
+    razorpayPaymentId: params.razorpayPaymentId,
+    signature: params.signature,
+  });
+  if (!valid) throw new ApiError(400, "SIGNATURE_MISMATCH", "Payment verification failed");
+
+  const [updated] = await prisma.$transaction([
+    prisma.order.update({
+      where: { id: order.id },
+      data: { paymentStatus: "PAID", paidAmount: order.totalAmount },
+    }),
+    prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: "PAID",
+        gatewayPaymentId: params.razorpayPaymentId,
+        gatewaySignature: params.signature,
+        paidAt: new Date(),
+      },
+    }),
+  ]);
+  return updated;
 }
 
 export async function listMyOrders(userId: string, page = 1, limit = 20) {

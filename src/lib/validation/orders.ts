@@ -24,7 +24,7 @@ export const createOrderSchema = z.object({
     .min(1)
     .max(200),
   shippingAddress: addressSchema,
-  paymentMethod: z.enum(["COD", "PAY_LATER"]), // RAZORPAY/STRIPE arrive with gateway keys
+  paymentMethod: z.enum(["COD", "PAY_LATER", "RAZORPAY"]),
   customerNote: z.string().max(500).optional(),
 });
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

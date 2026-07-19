@@ -7,15 +7,23 @@ import { useEffect, useState } from "react";
 import { useCart, cartSubtotal } from "@/components/cart/store";
 import { useStoreAuth, restoreStoreSession, storeJson } from "@/components/account/auth";
 import { AddressFields, EMPTY_ADDRESS, toAddressPayload, type AddressValues } from "@/components/account/AddressFields";
+import { payWithRazorpay, type RazorpaySession } from "@/components/account/razorpay";
 import { formatINR } from "@/lib/money";
+
+interface PaymentConfig {
+  razorpay: boolean;
+  cod: boolean;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { lines, remove } = useCart();
   const clearLine = remove;
-  const { status } = useStoreAuth();
+  const { status, user } = useStoreAuth();
   const [address, setAddress] = useState<AddressValues>(EMPTY_ADDRESS);
   const [note, setNote] = useState("");
+  const [method, setMethod] = useState<"RAZORPAY" | "COD">("COD");
+  const [config, setConfig] = useState<PaymentConfig>({ razorpay: false, cod: true });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,12 +33,28 @@ export default function CheckoutPage() {
     if (status === "unknown") void restoreStoreSession();
   }, [status]);
 
+  useEffect(() => {
+    fetch("/api/payments/config")
+      .then((r) => r.json())
+      .then((b) => {
+        if (b.success) {
+          setConfig(b.data);
+          if (b.data.razorpay) setMethod("RAZORPAY"); // online first when available
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError("");
     try {
-      const order = await storeJson<{ id: string; orderNumber: string }>("/api/orders", {
+      const order = await storeJson<{
+        id: string;
+        orderNumber: string;
+        razorpay: RazorpaySession | null;
+      }>("/api/orders", {
         method: "POST",
         body: JSON.stringify({
           lines: lines.map((l) => ({
@@ -39,12 +63,34 @@ export default function CheckoutPage() {
             quantity: l.qty,
           })),
           shippingAddress: toAddressPayload(address),
-          paymentMethod: "COD",
+          paymentMethod: method,
           customerNote: note || undefined,
         }),
       });
-      // Empty the cart, then hand over to the confirmation page.
+      // The order exists now — empty the cart regardless of what payment does.
       lines.forEach((l) => clearLine(l.productId, l.variantId));
+
+      if (method === "RAZORPAY" && order.razorpay) {
+        try {
+          await payWithRazorpay({
+            session: order.razorpay,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            customer: {
+              name: address.fullName || user?.firstName || "",
+              email: user?.email ?? "",
+              phone: address.phone,
+            },
+          });
+          router.replace(`/orders/${order.id}?placed=1&paid=1`);
+          return;
+        } catch (payErr) {
+          // Order stays payable from its page; take the customer there.
+          console.info("[checkout] payment incomplete:", payErr);
+          router.replace(`/orders/${order.id}?placed=1&payment=pending`);
+          return;
+        }
+      }
       router.replace(`/orders/${order.id}?placed=1`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not place the order");
@@ -91,13 +137,46 @@ export default function CheckoutPage() {
 
           <section className="bg-white rounded-2xl border border-ivory-200 p-6">
             <h2 className="text-sm font-semibold text-ink-950 mb-4">Payment</h2>
-            <label className="flex items-center gap-3 p-4 rounded-lg border border-gold-600 bg-gold-100/40 cursor-pointer">
-              <input type="radio" checked readOnly className="accent-gold-700" />
-              <div>
-                <p className="text-sm font-medium text-ink-950">Cash on delivery</p>
-                <p className="text-xs text-ink-500">Pay when your order arrives. Online payment is coming soon.</p>
-              </div>
-            </label>
+            <div className="space-y-3">
+              {config.razorpay && (
+                <label
+                  className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+                    method === "RAZORPAY" ? "border-gold-600 bg-gold-100/40" : "border-ivory-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={method === "RAZORPAY"}
+                    onChange={() => setMethod("RAZORPAY")}
+                    className="accent-gold-700"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-ink-950">Pay online</p>
+                    <p className="text-xs text-ink-500">UPI, cards, netbanking and wallets via Razorpay.</p>
+                  </div>
+                </label>
+              )}
+              {config.cod && (
+                <label
+                  className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+                    method === "COD" ? "border-gold-600 bg-gold-100/40" : "border-ivory-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={method === "COD"}
+                    onChange={() => setMethod("COD")}
+                    className="accent-gold-700"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-ink-950">Cash on delivery</p>
+                    <p className="text-xs text-ink-500">Pay when your order arrives.</p>
+                  </div>
+                </label>
+              )}
+            </div>
             <div className="mt-4">
               <label className="block text-sm text-ink-700 mb-1.5" htmlFor="order-note">
                 Order note (optional)
@@ -150,7 +229,11 @@ export default function CheckoutPage() {
               disabled={busy}
               className="cta-shimmer mt-5 w-full py-3.5 rounded-full bg-gold-700 text-white text-sm font-semibold hover:bg-gold-800 transition-colors disabled:opacity-60 cursor-pointer"
             >
-              {busy ? "Placing order…" : "Place order (COD)"}
+              {busy
+                ? "Placing order…"
+                : method === "RAZORPAY"
+                  ? "Place order & pay"
+                  : "Place order (COD)"}
             </button>
           </div>
         </aside>

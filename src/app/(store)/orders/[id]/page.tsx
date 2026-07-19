@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { CheckCircle } from "@phosphor-icons/react";
+import { CheckCircle, Warning } from "@phosphor-icons/react";
 import { useStoreAuth, restoreStoreSession, storeJson } from "@/components/account/auth";
+import { payWithRazorpay, type RazorpaySession } from "@/components/account/razorpay";
 import { formatINR } from "@/lib/money";
 
 interface OrderDetail {
@@ -40,9 +41,11 @@ function OrderView() {
   const { id } = useParams<{ id: string }>();
   const params = useSearchParams();
   const justPlaced = params.get("placed") === "1";
-  const { status } = useStoreAuth();
+  const { status, user } = useStoreAuth();
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [error, setError] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
 
   useEffect(() => {
     if (status === "unknown") void restoreStoreSession();
@@ -51,6 +54,37 @@ function OrderView() {
     }
     if (status === "guest") setError("Sign in to view this order.");
   }, [status, id]);
+
+  const needsPayment =
+    order?.paymentMethod === "RAZORPAY" && order.paymentStatus !== "PAID" && order.status !== "CANCELLED";
+
+  const payNow = async () => {
+    if (!order) return;
+    setPaying(true);
+    setPayError("");
+    try {
+      const session = await storeJson<RazorpaySession & { orderNumber: string }>(
+        "/api/payments/razorpay/session",
+        { method: "POST", body: JSON.stringify({ orderId: order.id }) },
+      );
+      await payWithRazorpay({
+        session,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customer: {
+          name: order.shippingAddress.fullName,
+          email: user?.email ?? "",
+          phone: order.shippingAddress.phone,
+        },
+      });
+      const fresh = await storeJson<OrderDetail>(`/api/orders/${id}`);
+      setOrder(fresh);
+    } catch (err) {
+      setPayError(err instanceof Error ? err.message : "Payment failed");
+    } finally {
+      setPaying(false);
+    }
+  };
 
   if (error) {
     return (
@@ -81,6 +115,27 @@ function OrderView() {
               .
             </p>
           </div>
+        </div>
+      )}
+
+      {needsPayment && (
+        <div className="mb-8 rounded-2xl bg-gold-100 border border-gold-500/40 p-6 flex items-start gap-4 flex-wrap">
+          <Warning size={26} weight="fill" className="text-gold-800 shrink-0" />
+          <div className="flex-1 min-w-[220px]">
+            <p className="font-display text-xl text-ink-950">Payment pending</p>
+            <p className="mt-1 text-sm text-ink-700">
+              Your order is reserved. Complete the payment to start processing.
+            </p>
+            {payError && <p className="mt-2 text-sm text-red-700">{payError}</p>}
+          </div>
+          <button
+            type="button"
+            disabled={paying}
+            onClick={payNow}
+            className="cta-shimmer px-7 py-3 rounded-full bg-gold-700 text-white text-sm font-semibold hover:bg-gold-800 transition-colors disabled:opacity-60 cursor-pointer"
+          >
+            {paying ? "Opening payment…" : `Pay ${formatINR(Number(order.totalAmount))}`}
+          </button>
         </div>
       )}
 
