@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { CheckCircle, Warning } from "@phosphor-icons/react";
-import { useStoreAuth, restoreStoreSession, storeJson } from "@/components/account/auth";
+import { CheckCircle, FilePdf, Warning } from "@phosphor-icons/react";
+import { useStoreAuth, restoreStoreSession, storeJson, storeFetch } from "@/components/account/auth";
 import { payWithRazorpay, type RazorpaySession } from "@/components/account/razorpay";
 import { formatINR } from "@/lib/money";
 
@@ -57,6 +57,26 @@ function OrderView() {
 
   const needsPayment =
     order?.paymentMethod === "RAZORPAY" && order.paymentStatus !== "PAID" && order.status !== "CANCELLED";
+
+  const invoiceReady =
+    !!order &&
+    order.status !== "CANCELLED" &&
+    (order.paymentStatus === "PAID" ||
+      order.channel === "WHOLESALE" ||
+      ["SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status));
+
+  const downloadInvoice = async () => {
+    const res = await storeFetch(`/api/orders/${id}/invoice`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setPayError(body?.error?.message ?? "Invoice unavailable");
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  };
 
   const payNow = async () => {
     if (!order) return;
@@ -149,9 +169,20 @@ function OrderView() {
               : order.paymentMethod}
           </p>
         </div>
-        <span className="text-xs px-3 py-1.5 rounded-full bg-gold-100 text-gold-800 font-medium">
-          {order.status.replaceAll("_", " ")}
-        </span>
+        <div className="flex items-center gap-3">
+          {invoiceReady && (
+            <button
+              type="button"
+              onClick={downloadInvoice}
+              className="inline-flex items-center gap-1.5 text-sm text-gold-700 hover:text-gold-800 underline underline-offset-4 cursor-pointer"
+            >
+              <FilePdf size={16} /> GST invoice
+            </button>
+          )}
+          <span className="text-xs px-3 py-1.5 rounded-full bg-gold-100 text-gold-800 font-medium">
+            {order.status.replaceAll("_", " ")}
+          </span>
+        </div>
       </div>
 
       {order.trackingNumber && (

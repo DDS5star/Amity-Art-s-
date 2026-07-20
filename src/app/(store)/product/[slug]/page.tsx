@@ -9,6 +9,7 @@ import { PurchasePanel } from "@/components/product/PurchasePanel";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Accordion } from "@/components/site/Accordion";
+import { JsonLd, productLd, breadcrumbLd } from "@/components/seo/JsonLd";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: product.name,
     description: product.shortDescription ?? undefined,
+    alternates: { canonical: `/product/${product.slug}` },
     openGraph: {
       title: `${product.name} | Amity Arts`,
       description: product.shortDescription ?? undefined,
@@ -105,6 +107,27 @@ export default async function ProductPage({ params }: Params) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
+      <JsonLd
+        data={productLd({
+          name: product.name,
+          slug: product.slug,
+          description: product.shortDescription,
+          image: product.primaryImage?.url ?? null,
+          sku: product.sku,
+          price: product.unitPrice,
+          inStock: product.inStock,
+          material: product.material,
+          ratingAvg: product.rating.avg,
+          ratingCount: product.rating.count,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbLd([
+          { name: "Jewellery", path: "/jewellery" },
+          { name: product.category.name, path: `/jewellery?categorySlug=${product.category.slug}` },
+          { name: product.name, path: `/product/${product.slug}` },
+        ])}
+      />
       <nav aria-label="Breadcrumb" className="text-xs text-ink-400 mb-6">
         <a href="/jewellery" className="hover:text-ink-700 transition-colors">
           Jewellery
