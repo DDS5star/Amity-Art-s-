@@ -1,0 +1,58 @@
+# Single-VPS production stack: app + Postgres + Redis behind your reverse proxy.
+# 1) cp .env.production.example .env.production and fill it in
+# 2) docker compose -f docker-compose.prod.yml up -d db redis
+# 3) docker compose -f docker-compose.prod.yml build app   (build reaches db via host network)
+# 4) docker compose -f docker-compose.prod.yml run --rm app npx prisma migrate deploy
+# 5) docker compose -f docker-compose.prod.yml up -d app
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amity}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env.production}
+      POSTGRES_DB: ${POSTGRES_DB:-amity_arts}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432" # host-local only; app uses the compose network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amity}"]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      network: host # lets the build's prerender reach db on 127.0.0.1:5433
+      args:
+        DATABASE_URL: postgresql://${POSTGRES_USER:-amity}:${POSTGRES_PASSWORD}@127.0.0.1:5433/${POSTGRES_DB:-amity_arts}?schema=public
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:?set in .env.production}
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-amity}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-amity_arts}?schema=public
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "127.0.0.1:3000:3000" # expose via nginx/caddy with TLS
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:

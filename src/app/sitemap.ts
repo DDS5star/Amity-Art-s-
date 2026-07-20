@@ -3,6 +3,10 @@ import { prisma } from "@/server/db";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+// Generated per request (CDN-cacheable) so image builds never need a live
+// database and new products appear without a redeploy.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, categories] = await Promise.all([
     prisma.product.findMany({

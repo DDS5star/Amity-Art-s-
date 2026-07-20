@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle for Docker/VPS deploys (Vercel ignores this).
+  output: "standalone",
   // pdfkit reads font metrics from its package dir at runtime — keep it external.
   serverExternalPackages: ["pdfkit"],
   images: {
