@@ -15,6 +15,7 @@ interface Media {
 export function Gallery({ media, name }: { media: Media[]; name: string }) {
   const images = media.filter((m) => m.type === "IMAGE");
   const [index, setIndex] = useState(0);
+  const [zoomOrigin, setZoomOrigin] = useState("50% 50%");
   const reduce = useReducedMotion();
   const current = images[index];
 
@@ -28,7 +29,16 @@ export function Gallery({ media, name }: { media: Media[]; name: string }) {
 
   return (
     <div>
-      <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-ivory-100">
+      {/* Cursor-follow zoom (desktop hover only; touch keeps plain view) */}
+      <div
+        className="group relative aspect-[4/5] rounded-xl overflow-hidden bg-ivory-100 md:cursor-zoom-in"
+        onMouseMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          setZoomOrigin(
+            `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}% ${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`,
+          );
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
@@ -44,7 +54,8 @@ export function Gallery({ media, name }: { media: Media[]; name: string }) {
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              style={reduce ? undefined : { transformOrigin: zoomOrigin }}
+              className={`object-cover ${reduce ? "" : "transition-transform duration-300 md:group-hover:scale-[1.8]"}`}
             />
           </motion.div>
         </AnimatePresence>

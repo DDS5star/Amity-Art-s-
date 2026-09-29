@@ -209,7 +209,7 @@ const channelVisibility = (channel: Channel): Prisma.EnumChannelVisibilityFilter
 
 export async function listProducts(query: ListProductsQuery, channel: Channel) {
   const {
-    page, limit, categorySlug, collectionSlug, search, gender, occasion,
+    page, limit, categorySlug, collectionSlug, search, gender, occasion, material,
     minPrice, maxPrice, featured, trending, newArrival, bestSeller, sort,
   } = query;
 
@@ -222,6 +222,7 @@ export async function listProducts(query: ListProductsQuery, channel: Channel) {
     ...(collectionSlug ? { collections: { some: { collection: { slug: collectionSlug } } } } : {}),
     ...(gender ? { gender } : {}),
     ...(occasion ? { occasion: { has: occasion } } : {}),
+    ...(material ? { material: { contains: material, mode: "insensitive" } } : {}),
     ...(minPrice != null || maxPrice != null
       ? { retailPrice: { gte: minPrice ?? undefined, lte: maxPrice ?? undefined } }
       : {}),

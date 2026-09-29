@@ -142,7 +142,9 @@ export default async function ProductPage({ params }: Params) {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-        <Gallery media={product.media} name={product.name} />
+        <div className="lg:sticky lg:top-24 self-start">
+          <Gallery media={product.media} name={product.name} />
+        </div>
 
         <div>
           <h1 className="font-display text-3xl md:text-4xl text-ink-950">{product.name}</h1>

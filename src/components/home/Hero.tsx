@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 const HeroScene = dynamic(() => import("./HeroScene").then((m) => m.HeroScene), {
   ssr: false,
@@ -33,6 +33,11 @@ function RisingLine({ words, delay = 0 }: { words: string; delay?: number }) {
 
 export function Hero() {
   const reduce = useReducedMotion();
+  // Subtle parallax: the decorative 3D layer lags the scroll (~12%), copy
+  // leads slightly. Decorative layers only — never body text.
+  const { scrollY } = useScroll();
+  const sceneY = useTransform(scrollY, [0, 700], [0, 84]);
+  const copyY = useTransform(scrollY, [0, 700], [0, -36]);
   const enter = (delay: number) =>
     reduce
       ? {}
@@ -43,8 +48,8 @@ export function Hero() {
         };
 
   return (
-    <section className="relative min-h-[calc(100dvh-7.5rem)] max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-12 items-center gap-10 pt-16 lg:pt-0">
-      <div className="lg:col-span-6 xl:col-span-5">
+    <section className="relative min-h-[calc(100dvh-7.5rem)] max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-12 items-center gap-10 pt-16 lg:pt-0 overflow-hidden lg:overflow-visible">
+      <motion.div style={reduce ? undefined : { y: copyY }} className="lg:col-span-6 xl:col-span-5">
         <h1 className="font-display text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-ink-950">
           <RisingLine words="Fine jewellery," />
           <br />
@@ -60,22 +65,25 @@ export function Hero() {
         <motion.div {...enter(0.42)} className="mt-9 flex flex-wrap items-center gap-4">
           <Link
             href="/jewellery"
-            className="cta-shimmer px-7 py-3.5 rounded-full bg-gold-700 text-white text-sm font-semibold hover:bg-gold-800 transition-colors active:scale-[0.98]"
+            className="cta-shimmer px-7 py-3.5 rounded-full bg-gold-700 text-white text-sm font-semibold hover:bg-gold-800 hover:scale-[1.03] transition-[background-color,transform] duration-200 active:scale-[0.98]"
           >
             Explore the collection
           </Link>
           <Link
             href="/wholesale"
-            className="px-7 py-3.5 rounded-full border border-ink-400 text-ink-800 text-sm hover:border-ink-800 transition-colors active:scale-[0.98]"
+            className="px-7 py-3.5 rounded-full border border-ink-400 text-ink-800 text-sm hover:border-ink-800 hover:scale-[1.03] transition-[border-color,transform] duration-200 active:scale-[0.98]"
           >
             Wholesale enquiries
           </Link>
         </motion.div>
-      </div>
+      </motion.div>
 
-      <div className="lg:col-span-6 xl:col-span-7 h-[340px] md:h-[440px] lg:h-[560px]">
+      <motion.div
+        style={reduce ? undefined : { y: sceneY, willChange: "transform" }}
+        className="lg:col-span-6 xl:col-span-7 h-[340px] md:h-[440px] lg:h-[560px]"
+      >
         <HeroScene />
-      </div>
+      </motion.div>
     </section>
   );
 }

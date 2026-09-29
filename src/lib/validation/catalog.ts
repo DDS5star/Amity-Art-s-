@@ -93,6 +93,7 @@ export const listProductsQuerySchema = z.object({
   search: z.string().max(120).optional(),
   gender: z.enum(["MEN", "WOMEN", "UNISEX", "KIDS"]).optional(),
   occasion: z.string().max(40).optional(),
+  material: z.string().max(60).optional(),
   minPrice: z.coerce.number().nonnegative().optional(),
   maxPrice: z.coerce.number().nonnegative().optional(),
   featured: z.coerce.boolean().optional(),

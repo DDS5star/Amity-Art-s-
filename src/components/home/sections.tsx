@@ -7,6 +7,7 @@ import { listProductsQuerySchema } from "@/lib/validation/catalog";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
 import { NewsletterForm } from "./NewsletterForm";
+import { BrandStoryScrolly } from "./BrandStoryScrolly";
 
 /* Server sections for the homepage. Each uses a distinct layout family. */
 
@@ -115,29 +116,12 @@ export async function BestSellers() {
   );
 }
 
-// ── Brand story: single deliberate dark color-block (once per page) ──
+// ── Brand story: dark color-block with scroll-tied storytelling ──
 export function BrandStory() {
   return (
-    <section id="story" className="bg-ink-950 py-28 md:py-36">
-      <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-        <Reveal>
-          <h2 className="font-display text-4xl md:text-5xl leading-[1.15] text-ivory-50">
-            Every piece passes through
-            <br />
-            <em className="italic text-gold-500 leading-[1.1] inline-block pb-1">
-              fourteen pairs
-            </em>{" "}
-            of hands.
-          </h2>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <p className="mt-8 text-ivory-200 leading-relaxed max-w-[52ch] mx-auto">
-            From the first wax mould to the final polish, our karigars shape each
-            design the way their fathers taught them. We plate over nickel-free
-            brass, set every stone by hand, and stand behind it all with a
-            one-year plating warranty.
-          </p>
-        </Reveal>
+    <section id="story" className="bg-ink-950 py-28 md:py-40 overflow-hidden">
+      <div className="max-w-4xl mx-auto px-4 md:px-8">
+        <BrandStoryScrolly />
       </div>
     </section>
   );

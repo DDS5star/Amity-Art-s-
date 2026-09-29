@@ -41,6 +41,43 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
 
   const active = (slug?: string) => query.categorySlug === slug;
 
+  // Current filter state → query-string, with overrides (undefined clears a key).
+  const withFilters = (overrides: Record<string, string | undefined>) =>
+    qs({
+      categorySlug: query.categorySlug,
+      sort: query.sort === "newest" ? undefined : query.sort,
+      occasion: query.occasion,
+      material: query.material,
+      minPrice: query.minPrice != null ? String(query.minPrice) : undefined,
+      maxPrice: query.maxPrice != null ? String(query.maxPrice) : undefined,
+      ...overrides,
+    });
+
+  const PRICE_BANDS = [
+    { label: "Under ₹1,000", minPrice: undefined, maxPrice: "999" },
+    { label: "₹1,000–2,500", minPrice: "1000", maxPrice: "2500" },
+    { label: "₹2,500+", minPrice: "2500", maxPrice: undefined },
+  ];
+  const priceActive = (b: (typeof PRICE_BANDS)[number]) =>
+    String(query.minPrice ?? "") === (b.minPrice ?? "") &&
+    String(query.maxPrice ?? "") === (b.maxPrice ?? "");
+
+  const OCCASIONS = ["wedding", "festive", "daily", "office", "party", "temple"];
+  const MATERIALS = [
+    { label: "Gold plated", value: "gold" },
+    { label: "Silver", value: "silver" },
+    { label: "Antique", value: "antique" },
+  ];
+
+  const pill = (isActive: boolean) =>
+    `px-3.5 py-1.5 rounded-full text-xs transition-colors ${
+      isActive
+        ? "bg-gold-700 text-white font-semibold"
+        : "border border-ivory-300 text-ink-700 hover:border-ink-500"
+    }`;
+  const hasRefinements =
+    query.occasion || query.material || query.minPrice != null || query.maxPrice != null;
+
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
       <Reveal>
@@ -50,7 +87,7 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
       {/* Category pills + sort */}
       <div className="mt-8 flex flex-wrap items-center gap-3">
         <Link
-          href="/jewellery"
+          href={withFilters({ categorySlug: undefined })}
           className={`px-4 py-2 rounded-full text-sm transition-colors ${
             !query.categorySlug
               ? "bg-ink-950 text-white font-semibold"
@@ -62,7 +99,7 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
         {categories.map((c) => (
           <Link
             key={c.id}
-            href={qs({ categorySlug: c.slug, sort: query.sort })}
+            href={withFilters({ categorySlug: c.slug })}
             className={`px-4 py-2 rounded-full text-sm transition-colors ${
               active(c.slug)
                 ? "bg-ink-950 text-white font-semibold"
@@ -78,7 +115,7 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
           {SORTS.map((s) => (
             <Link
               key={s.value}
-              href={qs({ categorySlug: query.categorySlug, sort: s.value })}
+              href={withFilters({ sort: s.value })}
               className={
                 query.sort === s.value
                   ? "text-gold-700 underline underline-offset-4"
@@ -89,6 +126,54 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Refinements: price / material / occasion (server-rendered links) */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2.5 text-xs">
+        <span className="text-ink-400 mr-1">Price</span>
+        {PRICE_BANDS.map((b) => (
+          <Link
+            key={b.label}
+            href={withFilters(
+              priceActive(b)
+                ? { minPrice: undefined, maxPrice: undefined }
+                : { minPrice: b.minPrice, maxPrice: b.maxPrice },
+            )}
+            className={pill(priceActive(b))}
+          >
+            {b.label}
+          </Link>
+        ))}
+        <span className="text-ink-400 ml-3 mr-1">Material</span>
+        {MATERIALS.map((m) => (
+          <Link
+            key={m.value}
+            href={withFilters({ material: query.material === m.value ? undefined : m.value })}
+            className={pill(query.material === m.value)}
+          >
+            {m.label}
+          </Link>
+        ))}
+        <span className="text-ink-400 ml-3 mr-1">Occasion</span>
+        {OCCASIONS.map((o) => (
+          <Link
+            key={o}
+            href={withFilters({ occasion: query.occasion === o ? undefined : o })}
+            className={`${pill(query.occasion === o)} capitalize`}
+          >
+            {o}
+          </Link>
+        ))}
+        {hasRefinements && (
+          <Link
+            href={withFilters({
+              occasion: undefined, material: undefined, minPrice: undefined, maxPrice: undefined,
+            })}
+            className="ml-3 text-gold-700 underline underline-offset-4"
+          >
+            Clear filters
+          </Link>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -117,11 +202,7 @@ export default async function JewelleryPage({ searchParams }: { searchParams: Pr
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((n) => (
             <Link
               key={n}
-              href={qs({
-                categorySlug: query.categorySlug,
-                sort: query.sort,
-                page: String(n),
-              })}
+              href={withFilters({ page: String(n) })}
               aria-current={n === pagination.page ? "page" : undefined}
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm ${
                 n === pagination.page
